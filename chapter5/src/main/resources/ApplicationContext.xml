@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName">
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+        <property name="url">
+            <value>jdbc:mysql://127.0.0.1:3306/daodemodb</value>
+        </property>
+        <property name="username">
+            <value>root</value>
+        </property>
+        <property name="password">
+            <value>123456</value>
+        </property>
+    </bean>
+    <bean id="userDao" class="spring.tutorial.chapter5.SpringDao.dao.impl.SpringDAODemo" depends-on="dataSource">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <bean id="userSqlUpdate" class="UserSqlUpdate">
+        <constructor-arg ref="dataSource" index="0"></constructor-arg>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 配置业务层代理 -->
+    <bean id="userDaoProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <!-- 配置目标对象 -->
+        <property name="target" ref="userDao"/>
+        <!-- 注入事务管理器 -->
+        <property name="transactionManager" ref="transactionManager"/>
+        <!-- 注入事务的属性 -->
+        <property name="transactionAttributes">
+            <props>
+                <prop key="transfer">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
